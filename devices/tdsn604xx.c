@@ -44,7 +44,7 @@ static void load_parameters(td_context_t* context)
 	else if (model_id == MODEL_ID_20)
 		CURRENT_LSB = 0.0000390625;
 	else
-		throw_exception(EXITCODE_DEVICE_OPEN_ERROR, NULL);
+		throw_exception(context, EXITCODE_DEVICE_OPEN_ERROR, NULL);
 
 	parameter_loaded = 1;
 }
@@ -56,7 +56,7 @@ static uint16_t devreg_name2addr(char* name)
 	else if (strcmp(name, REGNAME_MODEL_ID) == 0) return ADDR_MODEL_ID;
 
 	fprintf(stderr, "Unknown device register name: %s\n", name);
-	throw_exception(EXITCODE_INVALID_OPTION, NULL);
+	throw_exception(NULL, EXITCODE_INVALID_OPTION, NULL);
 
 	return 0xFFFF;
 }
@@ -66,7 +66,7 @@ static int set(td_context_t* context)
 {
 	char* p;
 
-	if (context->c == 0) throw_exception(EXITCODE_INVALID_OPTION, "No option is specified.");
+	if (context->c == 0) throw_exception(context, EXITCODE_INVALID_OPTION, "No option is specified.");
 
 	for (int i = 0; i < context->c; i++)
 	{
@@ -75,7 +75,7 @@ static int set(td_context_t* context)
 		if (p == NULL)
 		{
 			fprintf(stderr, "Invalid option: %s\n", context->v[i]);
-			throw_exception(EXITCODE_INVALID_OPTION, NULL);
+			throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 		}
 
 		*p = '\0';
@@ -122,7 +122,7 @@ static int get(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
+		throw_exception(context, EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
 	}
 
 	printf("\n");
@@ -139,7 +139,7 @@ static int listen(td_context_t* context)
 	while (1)
 	{
 		if ((TdHidListenReport(context->handle, buffer, REPORT_SIZE + 1)) != TDHID_SUCCESS)
-			throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+			throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 		if (buffer[1] == INPACKET_DUMP) break;
 	}
 
@@ -156,7 +156,7 @@ static int listen(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
+		throw_exception(context, EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
 	}
 
 	printf("\n");

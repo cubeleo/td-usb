@@ -39,7 +39,7 @@ static void start(td_context_t* context, uint8_t oneshot)
 		buffer[1] = OUTPACKET_START;
 		buffer[2] = oneshot; // continuous or one-shot
 		int result = TdHidSetReport(context->handle, buffer, context->device_type->output_report_size + 1, USB_HID_REPORT_TYPE_OUTPUT);
-		if (result != TDHID_SUCCESS) throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		if (result != TDHID_SUCCESS) throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 		is_start = 1;
 	}
@@ -92,12 +92,12 @@ static int get(td_context_t* context)
 	buffer[0] = 0x00;
 	buffer[1] = OUTPACKET_DUMP;
 	int result = TdHidSetReport(context->handle, buffer, context->device_type->output_report_size + 1, USB_HID_REPORT_TYPE_OUTPUT);
-	if (result != TDHID_SUCCESS) throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+	if (result != TDHID_SUCCESS) throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 	while (1)
 	{
 		if ((TdHidListenReport(context->handle, buffer, REPORT_SIZE + 1)) != TDHID_SUCCESS)
-			throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+			throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 		if (buffer[1] == INPACKET_DUMP) break;
 	}
 
@@ -114,7 +114,7 @@ static int listen(td_context_t* context)
 	while (1)
 	{
 		if ((TdHidListenReport(context->handle, buffer, REPORT_SIZE + 1)) != TDHID_SUCCESS)
-			throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+			throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 		if (buffer[1] == INPACKET_DUMP) break;
 	}
 
@@ -131,7 +131,7 @@ static int init(td_context_t* context)
 
 	if (context->c != 1)
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Invalid options.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Invalid options.");
 	}
 
 	if ( strcmp(context->v[0], "spad") == 0 )
@@ -142,7 +142,7 @@ static int init(td_context_t* context)
 		buffer[0] = 0x00;
 		buffer[1] = OUTPACKET_RSPAD_CAL;
 		result = TdHidSetReport(context->handle, buffer, context->device_type->output_report_size + 1, USB_HID_REPORT_TYPE_OUTPUT);
-		if (result != TDHID_SUCCESS) throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		if (result != TDHID_SUCCESS) throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 	}
 	else if ( strcmp(context->v[0], "xtalk") == 0 )
 	{
@@ -152,7 +152,7 @@ static int init(td_context_t* context)
 		buffer[0] = 0x00;
 		buffer[1] = OUTPACKET_XTALK_CAL;
 		result = TdHidSetReport(context->handle, buffer, context->device_type->output_report_size + 1, USB_HID_REPORT_TYPE_OUTPUT);
-		if (result != TDHID_SUCCESS) throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		if (result != TDHID_SUCCESS) throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 	}
 	else if (strcmp(context->v[0], "offset") == 0)
 	{
@@ -162,11 +162,11 @@ static int init(td_context_t* context)
 		buffer[0] = 0x00;
 		buffer[1] = OUTPACKET_ZD_OFFSET_CAL;
 		result = TdHidSetReport(context->handle, buffer, context->device_type->output_report_size + 1, USB_HID_REPORT_TYPE_OUTPUT);
-		if (result != TDHID_SUCCESS) throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		if (result != TDHID_SUCCESS) throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Invalid options.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Invalid options.");
 	}
 
 	return 0;

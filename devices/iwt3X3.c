@@ -16,7 +16,7 @@ static int write(td_context_t* context)
 
 	if (context->c != 1)
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Only one value can be set.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Only one value can be set.");
 	}
 
 	port_state = atoi(context->v[0]);
@@ -28,7 +28,7 @@ static int write(td_context_t* context)
 	buffer[2] = port_state; // Port state
 
 	if (TdHidSetReport(context->handle, buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	return 0;
 }
@@ -37,7 +37,7 @@ static int write(td_context_t* context)
 static int read(td_context_t* context)
 {
 	if (TdHidGetReport(context->handle, buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	if (context->format == FORMAT_SIMPLE)
 	{

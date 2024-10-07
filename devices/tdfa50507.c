@@ -30,7 +30,7 @@ static uint16_t devreg_name2addr(char* name)
 	else
 	{
 		fprintf(stderr, "Unknown device register name: %s\n", name);
-		throw_exception(EXITCODE_INVALID_OPTION, NULL);
+		throw_exception(NULL, EXITCODE_INVALID_OPTION, NULL);
 		return 0xFFFF;
 	}
 }
@@ -39,7 +39,7 @@ static int set(td_context_t* context)
 {
 	char* p;
 
-	if (context->c == 0) throw_exception(EXITCODE_INVALID_OPTION, "No option is specified.");
+	if (context->c == 0) throw_exception(context, EXITCODE_INVALID_OPTION, "No option is specified.");
 
 	for (int i = 0; i < context->c; i++)
 	{
@@ -48,7 +48,7 @@ static int set(td_context_t* context)
 		if (p == NULL)
 		{
 			fprintf(stderr, "Invalid option: %s\n", context->v[i]);
-			throw_exception(EXITCODE_INVALID_OPTION, NULL);
+			throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 		}
 
 		*p = '\0';
@@ -83,7 +83,7 @@ static int get(td_context_t* context)
 		}
 		else
 		{
-			throw_exception(EXITCODE_INVALID_FORMAT, "Unknown format");
+			throw_exception(context, EXITCODE_INVALID_FORMAT, "Unknown format");
 		}
 	}
 

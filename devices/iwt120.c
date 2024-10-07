@@ -22,7 +22,7 @@ static int write(td_context_t* context)
 
 	if (context->c != 1)
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Only one value can be set.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Only one value can be set.");
 	}
 
 	report_buffer[0] = 0x00; // Dummy report id
@@ -30,7 +30,7 @@ static int write(td_context_t* context)
 	report_buffer[2] = (uint8_t)atoi(context->v[0]); // Register value
 
 	if (TdHidSetReport(context->handle, report_buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	return 0;
 }
@@ -41,7 +41,7 @@ static int read(td_context_t* context)
 	uint8_t report_buffer[REPORT_SIZE + 1];
 	memset(report_buffer, 0, REPORT_SIZE + 1);
 	if (TdHidGetReport(context->handle, report_buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	if (context->c == 0 || strcmp(context->v[0], "MODE") == 0)
 	{
@@ -53,7 +53,7 @@ static int read(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Unknown option.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Unknown option.");
 	}
 
 	fflush(stdout);

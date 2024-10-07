@@ -85,4 +85,3 @@ typedef struct
 
 td_device_t *import_device_type(const char *model_name, int compare_length);
 void delete_device_type(td_device_t *device_type);
-void throw_exception(int exitcode, const char *msg);

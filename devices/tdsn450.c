@@ -32,14 +32,14 @@ static int write(td_context_t* context)
 {
 	memset(report_buffer, 0, FEATURE_REPORT_SIZE + 1);
 
-	if (context->c != 1) throw_exception(EXITCODE_INVALID_OPTION, "Only one value can be set.");
+	if (context->c != 1) throw_exception(context, EXITCODE_INVALID_OPTION, "Only one value can be set.");
 
 	char *p = strchr(context->v[0], '=');
 
 	if (p == NULL)
 	{
 		fprintf(stderr, "Invalid option: %s\n", context->v[0]);
-		throw_exception(EXITCODE_INVALID_OPTION, NULL);
+		throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 	}
 
 	*p = '\0';
@@ -48,7 +48,7 @@ static int write(td_context_t* context)
 	{
 		uint16_t threshold_value = atoi(p + 1);
 
-		if (threshold_value > 1024) throw_exception(EXITCODE_INVALID_RANGE, "Value must be smaller than 1024.");
+		if (threshold_value > 1024) throw_exception(context, EXITCODE_INVALID_RANGE, "Value must be smaller than 1024.");
 
 		report_buffer[1] = 0x89; // Update Threshold Opcode
 		report_buffer[2] = (threshold_value & 0xFF);
@@ -62,11 +62,11 @@ static int write(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Unknown register name.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Unknown register name.");
 	}
 
 	if (TdHidSetReport(context->handle, report_buffer, FEATURE_REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 	return 0;
 }
@@ -80,7 +80,7 @@ static int save(td_context_t* context)
 	report_buffer[2] = 0x50; // Magic
 
 	if (TdHidSetReport(context->handle, report_buffer, FEATURE_REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 	return 0;
 }
@@ -91,7 +91,7 @@ static int read(td_context_t* context)
 	memset(report_buffer, 0, FEATURE_REPORT_SIZE + 1);
 
 	if (TdHidGetReport(context->handle, report_buffer, FEATURE_REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 	if (context->c == 0)
 	{
@@ -126,7 +126,7 @@ static int read(td_context_t* context)
 	}
 	else if( context->format == FORMAT_RAW )
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Unknown register name.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Unknown register name.");
 	}
 
 	fflush(stdout);
@@ -144,7 +144,7 @@ static int listen(td_context_t* context)
 	while ((result = TdHidListenReport(context->handle, in_report_buffer, IN_REPORT_SIZE + 1)) == TDHID_ERR_TIMEOUT);
 
 	if (result == TDHID_ERR_IO)
-			throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+			throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 	if (context->format == FORMAT_RAW || context->format == FORMAT_SIMPLE)
 	{
@@ -153,7 +153,7 @@ static int listen(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
+		throw_exception(context, EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
 	}
 
 	return 0;

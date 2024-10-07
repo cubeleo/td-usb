@@ -182,3 +182,78 @@ uint32_t tddev2_read_devreg(td_context_t* context, uint16_t addr)
 
 	return 0;
 }
+
+
+/**
+* @brief TDDEV3 Std. read devreg
+*/
+read_result_t tddev3_read_devreg(td_context_t* context, uint16_t addr)
+{
+	int result = 0;
+	int retry_count = 0;
+	
+
+	while ( retry_count < 3 )
+	{
+		time_t start= time(NULL);	
+
+		DEBUG_PRINT((">> OUTPACKET_GET (ADDR: 0x%02X)\n", addr));
+		memset(buffer, 0, MAX_REPORT_LENGTH + 1);
+		buffer[0] = 0x00;        // Dummy report Id
+		buffer[1] = OUTPACKET_GET; // OUTPACKET_GET
+		buffer[2] = addr & 0xFF; // Address LSB
+		buffer[3] = addr >> 8;   // Address MSB
+
+		result = TdHidSetReport(context->handle, buffer, context->device_type->output_report_size + 1, USB_HID_REPORT_TYPE_OUTPUT);
+		if (result != TDHID_SUCCESS)
+		{
+			read_result_t read_result;
+			read_result.value = 0;
+			read_result.error_code = EXITCODE_DEVICE_IO_ERROR;
+			return read_result;
+		}
+
+		while (1)
+		{
+			result = TdHidListenReport(context->handle, buffer, context->device_type->input_report_size + 1);
+
+			if (result == TDHID_ERR_IO)
+			{
+				read_result_t read_result;
+				read_result.value = 0;
+				read_result.error_code = EXITCODE_DEVICE_IO_ERROR;
+				return read_result;
+			}
+			else if (result == TDHID_ERR_TIMEOUT)
+			{
+				retry_count++; 
+				break; 
+			}
+			else
+			{
+				if (buffer[1] == INPACKET_DEVREG)
+				{
+					DEBUG_PRINT(("<< INPACKET_DEVREG (ADDR: 0x%02X)\n", (buffer[3] << 8) | buffer[2]));
+					if( ((buffer[3] << 8) | buffer[2]) == addr )
+					{
+						read_result_t read_result;
+						read_result.value = *(uint32_t*)(&buffer[4]);
+						read_result.error_code = EXITCODE_NO_ERROR;
+						return read_result;
+					}
+				}
+				else
+				{
+					DEBUG_PRINT(("<< PACKET (0x%02X) %02X %02X %02X %02X %02X ...\n",
+						buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6]));
+					if (time(NULL) - start > 1) { retry_count++; break; }
+				}
+			}
+		}
+	}
+
+	read_result_t read_result;
+	read_result.value = 0;
+	read_result.error_code = EXITCODE_DEVICE_IO_ERROR;
+	return read_result;
+}

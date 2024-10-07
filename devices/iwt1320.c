@@ -26,7 +26,7 @@ static uint16_t devreg_name2addr(char* name)
 	else
 	{
 		fprintf(stderr, "Unknown device register name: %s\n", name);
-		throw_exception(EXITCODE_INVALID_OPTION, NULL);
+		throw_exception(NULL, EXITCODE_INVALID_OPTION, NULL);
 		return 0xFFFF;
 	}
 }
@@ -35,7 +35,7 @@ static int set(td_context_t* context)
 {
 	char* p;
 
-	if (context->c == 0) throw_exception(EXITCODE_INVALID_OPTION, "No option is specified.");
+	if (context->c == 0) throw_exception(context, EXITCODE_INVALID_OPTION, "No option is specified.");
 
 	for (int i = 0; i < context->c; i++)
 	{
@@ -44,7 +44,7 @@ static int set(td_context_t* context)
 		if (p == NULL)
 		{
 			fprintf(stderr, "Invalid option: %s\n", context->v[i]);
-			throw_exception(EXITCODE_INVALID_OPTION, NULL);
+			throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 		}
 
 		*p = '\0';
@@ -55,7 +55,7 @@ static int set(td_context_t* context)
 		buffer[2] = (uint8_t)atoi(p + 1); // value
 
 		if (TdHidSetReport(context->handle, buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-			throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+			throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 	}
 
 	return 0;
@@ -67,7 +67,7 @@ static int get(td_context_t* context)
 	uint16_t value;
 
 	if (TdHidGetReport(context->handle, buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	value = ((buffer[3] << 8) | buffer[4]);
 

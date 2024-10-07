@@ -58,7 +58,7 @@ static uint16_t devreg_name2addr(char* name)
 	else
 	{
 		fprintf(stderr, "Unknown device register name: %s\n", name);
-		throw_exception(EXITCODE_INVALID_OPTION, NULL);
+		throw_exception(NULL, EXITCODE_INVALID_OPTION, NULL);
 		return 0xFFFF;
 	}
 }
@@ -97,7 +97,7 @@ static int set(td_context_t* context)
 {
 	char* p;
 
-	if (context->c == 0) throw_exception(EXITCODE_INVALID_OPTION, "Device Register is not specified.");
+	if (context->c == 0) throw_exception(context, EXITCODE_INVALID_OPTION, "Device Register is not specified.");
 
 	for (int i = 0; i < context->c; i++)
 	{
@@ -106,7 +106,7 @@ static int set(td_context_t* context)
 		if (p == NULL)
 		{
 			fprintf(stderr, "Invalid option: %s\n", context->v[i]);
-			throw_exception(EXITCODE_INVALID_OPTION, NULL);
+			throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 		}
 
 		*p = '\0';
@@ -164,7 +164,7 @@ static int get(td_context_t* context)
 			}
 			else
 			{
-				throw_exception(EXITCODE_INVALID_FORMAT, "Unknown format");
+				throw_exception(context, EXITCODE_INVALID_FORMAT, "Unknown format");
 			}
 		}
 		else
@@ -188,7 +188,7 @@ static int listen(td_context_t* context)
 	while (1)
 	{
 		if ((TdHidListenReport(context->handle, buffer, REPORT_SIZE + 1)) != TDHID_SUCCESS)
-			throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+			throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 		if (buffer[1] == INPACKET_DUMP) break;
 	}
 
@@ -227,23 +227,23 @@ static int init(td_context_t* context)
 {
 	if (context->c == 1)
 	{
-		// ƒQƒCƒ“Z³’l‚ğİ’è‚·‚é (‘æ3ƒIƒvƒVƒ‡ƒ“‚Í^‚ÌÆ“x‚Æ‚µ‚Ä—^‚¦‚ç‚ê‚½’l(’PˆÊ: uW/cm2))
+		// ï¿½Qï¿½Cï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½lï¿½ï¿½İ’è‚·ï¿½ï¿½ (ï¿½ï¿½3ï¿½Iï¿½vï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Í^ï¿½ÌÆ“xï¿½Æ‚ï¿½ï¿½Ä—^ï¿½ï¿½ï¿½ï¿½ê‚½ï¿½l(ï¿½Pï¿½ï¿½: uW/cm2))
 		int uwcm2 = atoi(context->v[0]);
 
 		if (uwcm2 < 1000 || uwcm2 > 50000)
-			throw_exception(EXITCODE_INVALID_OPTION, "Refference intensity is out of range. Should be 1,000 to 50,000 uW/cm2.");
+			throw_exception(context, EXITCODE_INVALID_OPTION, "Refference intensity is out of range. Should be 1,000 to 50,000 uW/cm2.");
 
 		load_calibration_value(context);
 
-		// ^’l‚Æ‚µ‚Ä—^‚¦‚ç‚ê‚½Æ“x‚ğ’PˆÊ•ÏŠ·
+		// ï¿½^ï¿½lï¿½Æ‚ï¿½ï¿½Ä—^ï¿½ï¿½ï¿½ï¿½ê‚½ï¿½Æ“xï¿½ï¿½Pï¿½Ê•ÏŠï¿½
 		double pd_current = (uwcm2 / 1000.0) * nanoamp_per_mWcm2;
 		double max4206_vout = log(pd_current / 10.0) * voltage_per_decade;
 		uint32_t ref_intensity = (uint32_t)(((double)ADC_MAX_VALUE * max4206_vout) / ADC_VREF);
 
-		// Œ»İ‚ÌÆ“x‚ğæ“¾
+		// ï¿½ï¿½ï¿½İ‚ÌÆ“xï¿½ï¿½ï¿½æ“¾
 		uint32_t current_intensity = tddev2_read_devreg(context, REGADDR_INTENSITY);
 
-		// ƒfƒoƒCƒXƒŒƒWƒXƒ^‚É•Û‘¶
+		// ï¿½fï¿½oï¿½Cï¿½Xï¿½ï¿½ï¿½Wï¿½Xï¿½^ï¿½É•Û‘ï¿½
 		tddev2_write_devreg(context, REGADDR_CAL_INTENSITY, current_intensity);
 		tddev2_write_devreg(context, REGADDR_CAL_REFERENCE, ref_intensity);
 		tddev2_save_to_flash(context);
@@ -252,7 +252,7 @@ static int init(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Invalid options.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Invalid options.");
 	}
 
 	return 0;

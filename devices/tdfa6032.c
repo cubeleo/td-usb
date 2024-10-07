@@ -32,7 +32,7 @@ static uint16_t devreg_name2addr(char* name)
 	else if (strcmp(name, REGNAME_FIRMWARE_VERSION) == 0) return ADDR_FIRMWARE_VERSION;
 
 	fprintf(stderr, "Unknown device register name: %s\n", name);
-	throw_exception(EXITCODE_INVALID_OPTION, NULL);
+	throw_exception(NULL, EXITCODE_INVALID_OPTION, NULL);
 
 	return 0xFFFF;
 }
@@ -44,7 +44,7 @@ static int set(td_context_t* context)
 	uint32_t value;
 	char* p;
 
-	if (context->c == 0) throw_exception(EXITCODE_INVALID_OPTION, "No option is specified.");
+	if (context->c == 0) throw_exception(context, EXITCODE_INVALID_OPTION, "No option is specified.");
 
 	p = strchr(context->v[0], '=');
 
@@ -88,7 +88,7 @@ static int get(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
+		throw_exception(context, EXITCODE_INVALID_FORMAT, ERROR_MSG_INVALID_FORMAT);
 	}
 
 	printf("\n");

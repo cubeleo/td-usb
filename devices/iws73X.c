@@ -24,7 +24,7 @@ static int write(td_context_t* context)
 
 	if (context->c != 1)
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Only one value can be set.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Only one value can be set.");
 	}
 
 	if (strncmp(context->v[0], "LED=", 4) == 0)
@@ -41,11 +41,11 @@ static int write(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Unknown register name.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Unknown register name.");
 	}
 
 	if (TdHidSetReport(context->handle, report_buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	return 0;
 }
@@ -57,7 +57,7 @@ static int read(td_context_t* context)
 	uint8_t buffer[REPORT_SIZE + 1];
 	memset(buffer, 0, REPORT_SIZE + 1);
 	if (TdHidGetReport(context->handle, buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	unsigned short gas_ppm = ((unsigned char)buffer[1] << 8) | (unsigned char)buffer[2];
 	unsigned short status = ((unsigned char)buffer[3] << 8) | (unsigned char)buffer[4];
@@ -77,7 +77,7 @@ static int read(td_context_t* context)
 	}
 	else
 	{
-		throw_exception(EXITCODE_INVALID_OPTION, "Unknown option.");
+		throw_exception(context, EXITCODE_INVALID_OPTION, "Unknown option.");
 	}
 
 	return 0;

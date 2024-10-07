@@ -19,34 +19,6 @@
 
 static td_context_t *context = NULL;
 
-/**
-* @brief Exit process with specified error code and message.
-* @param[in] exitcode Exit code
-* @param[in] msg Error message
-*/
-void throw_exception(int exitcode, const char *msg)
-{
-	if (msg != NULL) fprintf(stderr, "%s\n", msg);
-
-	if (context != NULL)
-	{
-		if (context->handle != NULL) {
-			TdHidCloseDevice(context->handle);
-			context->handle = NULL;
-		}
-
-		if (context->device_type != NULL) {
-			delete_device_type(context->device_type);
-			context->device_type = NULL;
-		}
-
-		free(context);
-		context = NULL;
-	}
-
-	exit(exitcode);
-}
-
 
 static void print_usage(void)
 {
@@ -84,7 +56,7 @@ static void parse_args(int argc, char *argv[])
 	if (context->device_type == NULL)
 	{
 		fprintf(stderr, "Unknown model name: %s\n", arg_model_name);
-		throw_exception(EXITCODE_UNKNOWN_DEVICE, NULL);
+		throw_exception(context, EXITCODE_UNKNOWN_DEVICE, NULL);
 	}
 
 	arg_operation = argv[2];
@@ -99,7 +71,7 @@ static void parse_args(int argc, char *argv[])
 	else
 	{
 		fprintf(stderr, "Unknown operation: %s\n", arg_operation);
-		throw_exception(EXITCODE_UNKNOWN_OPERATION, NULL);
+		throw_exception(context, EXITCODE_UNKNOWN_OPERATION, NULL);
 	}
 
 	context->c = 0;
@@ -115,7 +87,7 @@ static void parse_args(int argc, char *argv[])
 				if (p == NULL)
 				{
 					fprintf(stderr, "No format is specified.\n");
-					throw_exception(EXITCODE_INVALID_OPTION, NULL);
+					throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 				}
 				if (strcmp("json", p + 1) == 0) context->format = FORMAT_JSON;
 				if (strcmp("raw", p + 1) == 0) context->format = FORMAT_RAW;
@@ -133,7 +105,7 @@ static void parse_args(int argc, char *argv[])
 					if (context->interval < OPTION_MIN_INTERVAL)
 					{
 						fprintf(stderr, "Interval must be >= %d msec.\n", OPTION_MIN_INTERVAL);
-						throw_exception(EXITCODE_INVALID_OPTION, NULL);
+						throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 					}
 				}
 				else
@@ -147,14 +119,14 @@ static void parse_args(int argc, char *argv[])
 				if (p == NULL)
 				{
 					fprintf(stderr, "Skip count is not set.\n");
-					throw_exception(EXITCODE_INVALID_OPTION, NULL);
+					throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 				}
 
 				context->skip = atoi(p + 1);
 				if (context->skip < OPTION_MIN_SKIP)
 				{
 					fprintf(stderr, "Skip count must be >= %d.\n", OPTION_MIN_SKIP);
-					throw_exception(EXITCODE_INVALID_OPTION, NULL);
+					throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 				}
 			}
 		}
@@ -163,7 +135,7 @@ static void parse_args(int argc, char *argv[])
 			if (context->c >= TD_CONTEXT_MAX_ARG_COUNT)
 			{
 				fprintf(stderr, "Option count must be < %d\n", TD_CONTEXT_MAX_ARG_COUNT);
-				throw_exception(EXITCODE_INVALID_OPTION, NULL);
+				throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 			}
 			else
 			{
@@ -203,7 +175,7 @@ int main(int argc, char *argv[])
 			p, len);	
 		printf("%s\n",p);
 		free(p);		
-		throw_exception(EXITCODE_NO_ERROR, NULL);
+		throw_exception(context, EXITCODE_NO_ERROR, NULL);
 	}
 
 	p = strchr(argv[1], ':');
@@ -215,7 +187,7 @@ int main(int argc, char *argv[])
 	if (context->handle == NULL)
 	{
 		fprintf(stderr, "Device open error. code=%d\n", errno);
-		throw_exception(EXITCODE_DEVICE_OPEN_ERROR, NULL);
+		throw_exception(context, EXITCODE_DEVICE_OPEN_ERROR, NULL);
 	}
 	
 	switch (context->operation)
@@ -230,7 +202,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+			throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 				"Listen operation is not supported on this device.");
 		}
 		break;
@@ -243,7 +215,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+			throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 				"GET operation is not supported on this device.");
 		}
 		break;
@@ -255,7 +227,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+			throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 				"SET operation is not supported on this device.");
 		}
 		break;
@@ -267,7 +239,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+			throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 				"SAVE operation is not supported on this device.");
 		}
 		break;
@@ -279,13 +251,13 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+			throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 				"DESTROY operation is not supported on this device.");
 		}
 		break;
 
 	case OPERATION_DFU:
-		throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+		throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 			"Switching to DFU-mode is not supported yet.");
 		break;
 
@@ -296,11 +268,11 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			throw_exception(EXITCODE_OPERATION_NOT_SUPPORTED,
+			throw_exception(context, EXITCODE_OPERATION_NOT_SUPPORTED,
 				"INIT operation is not supported on this device.");
 		}		
 		break;
 	}
 
-	throw_exception(EXITCODE_NO_ERROR, NULL);
+	throw_exception(context, EXITCODE_NO_ERROR, NULL);
 }

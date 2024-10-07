@@ -48,7 +48,7 @@ static uint16_t devreg_name2addr(char* name)
 	else
 	{
 		fprintf(stderr, "Unknown device register name: %s\n", name);
-		throw_exception(EXITCODE_INVALID_OPTION, NULL);
+		throw_exception(NULL, EXITCODE_INVALID_OPTION, NULL);
 		return 0xFFFF;
 	}
 }
@@ -62,14 +62,14 @@ static void wdg_clear(td_context_t* context)
 
 	DEBUG_PRINT(("Sending OUTPACKET_WDGCLR command.\n"));
 	if (TdHidSetReport(context->handle, report_buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_OUTPUT))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	DEBUG_PRINT(("Listening INPACKET_ACK reply.\n"));
 	if (TdHidListenReport(context->handle, report_buffer, REPORT_SIZE + 1) != 0)
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	if (report_buffer[1] != INPACKET_ACK)
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "Invalid reply.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "Invalid reply.");
 }
 
 
@@ -82,7 +82,7 @@ static void force_activate(td_context_t* context)
 
 	DEBUG_PRINT(("Sending OUTPACKET_ACT command.\n"));
 	if (TdHidSetReport(context->handle, report_buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_OUTPUT))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 }
 
 
@@ -113,7 +113,7 @@ static int set(td_context_t* context)
 				if (p == NULL)
 				{
 					fprintf(stderr, "Invalid option: %s\n", context->v[i]);
-					throw_exception(EXITCODE_INVALID_OPTION, NULL);
+					throw_exception(context, EXITCODE_INVALID_OPTION, NULL);
 				}
 
 				*p = '\0';
@@ -150,7 +150,7 @@ static int get(td_context_t* context)
 		}
 		else
 		{
-			throw_exception(EXITCODE_INVALID_FORMAT, "Unknown format");
+			throw_exception(context, EXITCODE_INVALID_FORMAT, "Unknown format");
 		}
 	}
 
@@ -169,7 +169,7 @@ static int listen(td_context_t* context)
 	while ((result = TdHidListenReport(context->handle, report_buffer, REPORT_SIZE + 1)) == TDHID_ERR_TIMEOUT);
 
 	if (result == TDHID_ERR_IO)
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, ERROR_MSG_DEVICE_IO_ERROR);
 
 	printf("%d,%d\n", report_buffer[1], report_buffer[2]);
 	fflush(stdout);

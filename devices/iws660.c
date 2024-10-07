@@ -22,7 +22,7 @@ static int read(td_context_t* context)
 	double L;
 
 	if (TdHidGetReport(context->handle, buffer, REPORT_SIZE + 1, USB_HID_REPORT_TYPE_FEATURE))
-		throw_exception(EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
+		throw_exception(context, EXITCODE_DEVICE_IO_ERROR, "USB I/O Error.");
 
 	value = ((buffer[6] << 8) | buffer[5]);
 	cal = ((buffer[10] << 8) | buffer[9]);

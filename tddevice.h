@@ -21,3 +21,10 @@ int tddev2_write_devreg(td_context_t* context, uint16_t addr, uint32_t value);
 int tddev2_destroy_firmware(td_context_t* context);
 int tddev2_save_to_flash(td_context_t* context);
 uint32_t tddev2_read_devreg(td_context_t* context, uint16_t addr);
+
+typedef struct read_result
+{
+    uint32_t value;
+    int error_code;
+} read_result_t;
+read_result_t tddev3_read_devreg(td_context_t* context, uint16_t addr);

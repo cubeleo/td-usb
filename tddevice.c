@@ -16,8 +16,6 @@
 #include "tddevice.h"
 
 
-static uint8_t buffer[MAX_REPORT_LENGTH + 1];
-
 /**
 * @brief TDDEV1 Std. INIT Command
 */
@@ -25,6 +23,7 @@ int tddev1_init_operation(td_context_t* context)
 {
 	time_t epoc;
 	
+	uint8_t buffer[MAX_REPORT_LENGTH + 1];
 	memset(buffer, 0, MAX_REPORT_LENGTH + 1);
 
 	buffer[1] = TDDEV1_CMD_INIT;
@@ -46,6 +45,7 @@ int tddev1_init_operation(td_context_t* context)
 */
 int tddev2_save_to_flash(td_context_t* context)
 {
+	uint8_t buffer[MAX_REPORT_LENGTH + 1];
 	memset(buffer, 0, MAX_REPORT_LENGTH + 1);
 
 	buffer[1] = OUTPACKET_SAVE; // OUTPACKET_SAVE
@@ -76,6 +76,7 @@ int tddev2_save_to_flash(td_context_t* context)
 */
 int tddev2_destroy_firmware(td_context_t* context)
 {
+	uint8_t buffer[MAX_REPORT_LENGTH + 1];
 	printf("WARNING: The device will not be available until new firmware is written. Continue? [y/N]");
 	char c = fgetc(stdin);
 
@@ -100,6 +101,7 @@ int tddev2_destroy_firmware(td_context_t* context)
 */
 int tddev2_write_devreg(td_context_t* context, uint16_t addr, uint32_t value)
 {
+	uint8_t buffer[MAX_REPORT_LENGTH + 1];
 	memset(buffer, 0, MAX_REPORT_LENGTH + 1);
 
 	buffer[0] = 0x00;				 // Dummy report Id
@@ -132,6 +134,7 @@ uint32_t tddev2_read_devreg(td_context_t* context, uint16_t addr)
 {
 	int result = 0;
 	int retry_count = 0;
+	uint8_t buffer[MAX_REPORT_LENGTH + 1];
 	
 
 	while ( retry_count < 3 )
@@ -191,6 +194,7 @@ read_result_t tddev3_read_devreg(td_context_t* context, uint16_t addr)
 {
 	int result = 0;
 	int retry_count = 0;
+	uint8_t buffer[MAX_REPORT_LENGTH + 1];
 	
 
 	while ( retry_count < 3 )

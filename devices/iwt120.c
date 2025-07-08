@@ -73,9 +73,9 @@ static td_device_t *export_type(void)
 	dt->vendor_id = 0x16c0;
 	dt->product_id = 0x05df;
 	dt->output_report_size = REPORT_SIZE;
-	dt->init = tddev1_init_operation;
-	dt->set = write;
-	dt->get = read;
+	dt->init = (TDCallbackFn)tddev1_init_operation;
+	dt->set = (TDCallbackFn)write;
+	dt->get = (TDCallbackFn)read;
 
 	return dt;
 }

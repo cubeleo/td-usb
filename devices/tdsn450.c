@@ -168,11 +168,11 @@ static td_device_t* export_type(void)
 	dt->vendor_id = TOKYODEVICES_VENDOR_ID;
 	dt->product_id = TDSN450_PRODUCT_ID;
 	dt->output_report_size = FEATURE_REPORT_SIZE;
-	dt->listen = listen;
-	dt->init = tddev1_init_operation;
-	dt->set = write;
-	dt->get = read;
-	dt->save = save;
+	dt->listen = (TDCallbackFn)listen;
+	dt->init = (TDCallbackFn)tddev1_init_operation;
+	dt->set = (TDCallbackFn)write;
+	dt->get = (TDCallbackFn)read;
+	dt->save = (TDCallbackFn)save;
 
 	return dt;
 }

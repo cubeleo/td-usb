@@ -52,6 +52,8 @@
 #endif
 
 
+typedef int (*TDCallbackFn)(void *);
+
 
 typedef struct {
 	char* product_name;
@@ -85,3 +87,5 @@ typedef struct
 
 td_device_t *import_device_type(const char *model_name, int compare_length);
 void delete_device_type(td_device_t *device_type);
+
+void throw_exception(td_context_t *context, int exitcode, const char *msg);

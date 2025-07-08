@@ -69,8 +69,8 @@ static td_device_t* export_type(void)
 	device->product_id = PRODUCT_ID;
 	device->output_report_size = OUT_REPORT_BUFFER_SIZE;
 	device->input_report_size = IN_REPORT_BUFFER_SIZE;
-	device->get = get;	
-	device->destroy = tddev2_destroy_firmware;
+	device->get = (TDCallbackFn)get;	
+	device->destroy = (TDCallbackFn)tddev2_destroy_firmware;
 
 	return device;
 }

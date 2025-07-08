@@ -113,11 +113,11 @@ static td_device_t* export_type(void)
 	device->product_id = PRODUCT_ID;
 	device->output_report_size = REPORT_SIZE;
 	device->input_report_size = REPORT_SIZE;
-	device->get = get;
-	device->set = set;
-	device->destroy = tddev2_destroy_firmware;
-	device->save = tddev2_save_to_flash;
-	device->init = init;
+	device->get = (TDCallbackFn)get;
+	device->set = (TDCallbackFn)set;
+	device->destroy = (TDCallbackFn)tddev2_destroy_firmware;
+	device->save = (TDCallbackFn)tddev2_save_to_flash;
+	device->init = (TDCallbackFn)init;
 
 	return device;
 }

@@ -57,7 +57,6 @@ static int read(td_context_t* context)
 	return 0;
 }
 
-
 static td_device_t* iwt303_export_type(void)
 {
 	td_device_t* dt = (td_device_t*)malloc(sizeof(td_device_t));
@@ -69,9 +68,9 @@ static td_device_t* iwt303_export_type(void)
 	dt->vendor_id = 0x16c0;
 	dt->product_id = 0x05df;
 	dt->output_report_size = REPORT_SIZE;
-	dt->get = read;
-	dt->set = write;
-	dt->init = tddev1_init_operation;
+	dt->get = (TDCallbackFn)read;
+	dt->set = (TDCallbackFn)write;
+	dt->init = (TDCallbackFn)tddev1_init_operation;
 
 	return dt;
 }
@@ -88,9 +87,9 @@ static td_device_t* iwt313_export_type(void)
 	dt->vendor_id = 0x16c0;
 	dt->product_id = 0x05df;
 	dt->output_report_size = REPORT_SIZE;
-	dt->get = read;
-	dt->set = write;
-	dt->init = tddev1_init_operation;
+	dt->get = (TDCallbackFn)read;
+	dt->set = (TDCallbackFn)write;
+	dt->init = (TDCallbackFn)tddev1_init_operation;
 
 	return dt;
 }
